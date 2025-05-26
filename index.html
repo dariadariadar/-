@@ -17,6 +17,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* Фоновые сердечки */
@@ -25,6 +26,7 @@
             opacity: 0.3;
             z-index: 0;
             animation: floatBg 15s linear infinite;
+            pointer-events: none;
         }
         
         @keyframes floatBg {
@@ -64,25 +66,84 @@
             box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
             position: relative;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
-        .main-img {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 5px solid #ff69b4;
-            margin: 0 auto;
+        /* Торт со свечами */
+        .cake-container {
             display: none;
-            animation: pulse 2s infinite;
+            margin: 20px auto;
+            position: relative;
+            width: 250px;
+            height: 180px;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .cake {
+            position: absolute;
+            bottom: 0;
+            width: 200px;
+            height: 80px;
+            background: #f9c5d5;
+            border-radius: 10px 10px 0 0;
+            left: 50%;
+            transform: translateX(-50%);
         }
         
+        .cake-top {
+            position: absolute;
+            bottom: 70px;
+            width: 220px;
+            height: 40px;
+            background: #f999b7;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .candle {
+            position: absolute;
+            bottom: 110px;
+            width: 8px;
+            height: 30px;
+            background: linear-gradient(to right, #a2d2ff, #bde0fe);
+            border-radius: 3px;
+        }
+        
+        .flame {
+            position: absolute;
+            width: 12px;
+            height: 20px;
+            background: #ffbe0b;
+            border-radius: 50% 50% 20% 20%;
+            animation: flicker 1.5s infinite alternate;
+            box-shadow: 0 0 15px #ffbe0b, 0 0 30px #ffbe0b;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.8); opacity: 0.7; }
+        }
+        
+        /* Фотографии */
+        .photos {
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .photo {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #ff69b4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Текст поздравления */
         .congrats-text {
             display: none;
             color: #333;
@@ -91,6 +152,20 @@
             margin: 20px 0;
         }
         
+        /* Анимированный поцелуй */
+        .kiss {
+            display: none;
+            font-size: 40px;
+            animation: float 3s ease-in-out infinite;
+            margin-top: 15px;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Вылетающие сердечки */
         .heart {
             position: absolute;
             pointer-events: none;
@@ -132,8 +207,27 @@
         
         <button class="btn" id="surpriseBtn">Открыть поздравление</button>
         
-        <img src="https://i.imgur.com/JR6hX3G.png" alt="Поздравление" class="main-img" id="mainImage">
+        <!-- Торт со свечами -->
+        <div class="cake-container" id="cakeContainer">
+            <div class="cake"></div>
+            <div class="cake-top"></div>
+            <!-- Свечи -->
+            <div class="candle" style="left: 30%;"></div>
+            <div class="candle" style="left: 50%;"></div>
+            <div class="candle" style="left: 70%;"></div>
+            <!-- Огоньки -->
+            <div class="flame" style="left: 30%; bottom: 140px;"></div>
+            <div class="flame" style="left: 50%; bottom: 140px;"></div>
+            <div class="flame" style="left: 70%; bottom: 140px;"></div>
+        </div>
         
+        <!-- Две фотографии -->
+        <div class="photos" id="photos">
+            <img src="https://i.imgur.com/JR6hX3G.png" class="photo" alt="Фото 1">
+            <img src="https://i.imgur.com/JR6hX3G.png" class="photo" alt="Фото 2">
+        </div>
+        
+        <!-- Текст поздравления -->
         <div class="congrats-text" id="congratsText">
             Дорогая [Имя],<br><br>
             С Днём Рождения! 💖<br>
@@ -141,12 +235,17 @@
             море радости, счастья и любви!<br><br>
             Твоя [Твоё имя] 😊
         </div>
+        
+        <!-- Анимированный поцелуй -->
+        <div class="kiss" id="kiss">😘</div>
     </div>
 
     <script>
         const btn = document.getElementById('surpriseBtn');
-        const mainImg = document.getElementById('mainImage');
+        const cakeContainer = document.getElementById('cakeContainer');
+        const photos = document.getElementById('photos');
         const congratsText = document.getElementById('congratsText');
+        const kiss = document.getElementById('kiss');
         
         // Обработчики для кликов и касаний
         btn.addEventListener('click', handleButtonClick);
@@ -154,16 +253,24 @@
             e.preventDefault();
             handleButtonClick();
         }, { passive: false });
-
+        
+        // Проверка, была ли уже нажата кнопка
+        let buttonClicked = false;
+        
         function handleButtonClick() {
+            if (buttonClicked) return;
+            buttonClicked = true;
+            
             // 1. Запускаем "взрыв" сердечек
             createHeartExplosion();
             
-            // 2. Через 1 секунду показываем поздравление
+            // 2. Через 1 секунду показываем все элементы
             setTimeout(() => {
                 btn.style.display = 'none';
-                mainImg.style.display = 'block';
+                cakeContainer.style.display = 'block';
+                photos.style.display = 'flex';
                 congratsText.style.display = 'block';
+                kiss.style.display = 'block';
             }, 1000);
         }
         
@@ -186,8 +293,6 @@
                 const distance = 100 + Math.random() * 200;
                 heart.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
                 heart.style.setProperty('--ty', Math.sin(angle) * -distance + 'px');
-                
-                heart.style.animationDelay = (Math.random() * 0.5) + 's';
                 
                 document.body.appendChild(heart);
                 
