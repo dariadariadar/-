@@ -47,10 +47,15 @@
             z-index: 10;
         }
         
+        .title-container {
+            margin-bottom: 20px;
+        }
+        
         h1 {
             color: #ff1493;
             font-size: 28px;
-            margin-bottom: 20px;
+            margin: 0;
+            transition: all 0.5s;
         }
         
         .btn {
@@ -125,18 +130,16 @@
             50% { transform: scale(0.8); opacity: 0.7; }
         }
         
-        /* Фотографии */
-        .photos {
+        /* Фотография */
+        .photo-container {
             display: none;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            margin: 20px auto;
+            text-align: center;
         }
         
         .photo {
-            width: 120px;
-            height: 120px;
+            width: 200px;
+            height: 200px;
             object-fit: cover;
             border-radius: 10px;
             border: 3px solid #ff69b4;
@@ -203,7 +206,9 @@
     </script>
     
     <div class="card">
-        <h1>Нажми на кнопку! 🎁</h1>
+        <div class="title-container" id="titleContainer">
+            <h1 id="title">Нажми на кнопку! 🎁</h1>
+        </div>
         
         <button class="btn" id="surpriseBtn">Открыть поздравление</button>
         
@@ -221,19 +226,22 @@
             <div class="flame" style="left: 70%; bottom: 140px;"></div>
         </div>
         
-        <!-- Две фотографии -->
-        <div class="photos" id="photos">
-            <img src="https://i.imgur.com/JR6hX3G.png" class="photo" alt="Фото 1">
-            <img src="https://i.imgur.com/JR6hX3G.png" class="photo" alt="Фото 2">
+        <!-- Ваше фото -->
+        <div class="photo-container" id="photoContainer">
+            <img src="https://raw.githubusercontent.com/dariadariadar/-/main/photo_2025-05-26_20-06-43.jpg" 
+                 class="photo" 
+                 alt="Наше фото" 
+                 id="photo"
+                 onerror="this.src='https://i.imgur.com/JR6hX3G.png'">
         </div>
         
         <!-- Текст поздравления -->
         <div class="congrats-text" id="congratsText">
-            Дорогая [Имя],<br><br>
+            Дорогой мой Смешарик,<br><br>
             С Днём Рождения! 💖<br>
             Пусть этот год принесёт тебе<br>
             море радости, счастья и любви!<br><br>
-            Твоя [Твоё имя] 😊
+            😊
         </div>
         
         <!-- Анимированный поцелуй -->
@@ -242,10 +250,18 @@
 
     <script>
         const btn = document.getElementById('surpriseBtn');
+        const titleContainer = document.getElementById('titleContainer');
+        const title = document.getElementById('title');
         const cakeContainer = document.getElementById('cakeContainer');
-        const photos = document.getElementById('photos');
+        const photoContainer = document.getElementById('photoContainer');
+        const photo = document.getElementById('photo');
         const congratsText = document.getElementById('congratsText');
         const kiss = document.getElementById('kiss');
+        
+        // Проверка загрузки фото
+        photo.onerror = function() {
+            photo.src = 'https://i.imgur.com/JR6hX3G.png'; // Fallback изображение
+        };
         
         // Обработчики для кликов и касаний
         btn.addEventListener('click', handleButtonClick);
@@ -254,24 +270,21 @@
             handleButtonClick();
         }, { passive: false });
         
-        // Проверка, была ли уже нажата кнопка
-        let buttonClicked = false;
-        
         function handleButtonClick() {
-            if (buttonClicked) return;
-            buttonClicked = true;
+            // 1. Меняем заголовок и скрываем кнопку
+            title.textContent = 'С Днём Рождения! 🎉';
+            btn.style.display = 'none';
             
-            // 1. Запускаем "взрыв" сердечек
+            // 2. Запускаем "взрыв" сердечек
             createHeartExplosion();
             
-            // 2. Через 1 секунду показываем все элементы
+            // 3. Показываем все элементы
             setTimeout(() => {
-                btn.style.display = 'none';
                 cakeContainer.style.display = 'block';
-                photos.style.display = 'flex';
+                photoContainer.style.display = 'block';
                 congratsText.style.display = 'block';
                 kiss.style.display = 'block';
-            }, 1000);
+            }, 500);
         }
         
         function createHeartExplosion() {
